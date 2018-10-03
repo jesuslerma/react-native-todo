@@ -27,12 +27,22 @@ export class Todo extends Component {
     this.setState({newTodo: text})
   }
 
+  async removeTodo (idx) {
+    console.log('removing todo')
+    const todo = this.state.todos[idx]
+    const result = await fetch(`http://192.168.15.8:3011/todos/${todo.id}`, {
+      method: 'delete'
+    })
+    const todos = [...this.state.todos.slice(0, idx), ...this.state.todos.slice(idx + 1)]
+    this.setState({todos})
+  }
+
   async handlePress () {
     const newTodo = {
       name: this.state.newTodo
     }
     // the ip value will change
-    await fetch('http://192.168.15.8:3011/todos', {
+    const result = await fetch('http://192.168.15.8:3011/todos', {
       method: 'post',
       headers: {
         'Accept': 'application/json',
@@ -40,6 +50,7 @@ export class Todo extends Component {
       },
       body: JSON.stringify(newTodo)
     })
+    const todo = await result.json()
     const todos = [...this.state.todos, newTodo]
     this.setState({todos, newTodo: ''})
   }
@@ -63,7 +74,12 @@ export class Todo extends Component {
         <View style={styles.todos}>
           {this.state.todos.map((todo, i) => (
             <View key={i} style={styles.todo}>
-              <Text style={styles.todoText}>{todo.name}</Text>
+              <Text
+                style={styles.todoText}
+                onPress={() => this.removeTodo.call(this, i)}
+              >
+                {todo.name}
+              </Text>
             </View>
           ))}
         </View>
